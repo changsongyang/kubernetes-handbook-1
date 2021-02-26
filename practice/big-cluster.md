@@ -1,6 +1,6 @@
-# Kubernetes 大规模集群
+# 大规模集群
 
-Kubernetes v1.6-v1.11 单集群最大支持 5000 个节点，也就是说 Kubernetes 最新稳定版的单个集群支持
+Kubernetes v1.6+ 单集群最大支持 5000 个节点，也就是说 Kubernetes 最新稳定版的单个集群支持
 
 * 不超过 5000 个节点
 * 不超过 150000 个 Pod
@@ -23,8 +23,9 @@ Kubernetes v1.6-v1.11 单集群最大支持 5000 个节点，也就是说 Kubern
 
 除了常规的 [Etcd 高可用集群](https://coreos.com/etcd/docs/3.2.15/op-guide/clustering.html)配置、使用 SSD 存储等，还需要为 Events 配置单独的 Etcd 集群。即部署两套独立的 Etcd 集群，并配置 kube-apiserver
 
-```sh
---etcd-servers="http://etcd1:2379,http://etcd2:2379,http://etcd3:2379" --etcd-servers-overrides="/events#http://etcd4:2379,http://etcd5:2379,http://etcd6:2379"
+```bash
+--etcd-servers="http://etcd1:2379,http://etcd2:2379,http://etcd3:2379" \
+--etcd-servers-overrides="/events#http://etcd4:2379,http://etcd5:2379,http://etcd6:2379"
 ```
 
 另外，Etcd 默认存储限制为 2GB，可以通过 `--quota-backend-bytes` 选项增大。
@@ -46,7 +47,7 @@ Kubernetes 集群内的扩展也需要分配更多的资源，包括为这些 Po
 
 以下扩展服务需要增大 CPU 和内存：
 
-* [DNS (kube-dns or CoreDNS)](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns)
+* [DNS \(kube-dns or CoreDNS\)](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns)
 * [InfluxDB and Grafana](http://releases.k8s.io/master/cluster/addons/cluster-monitoring/influxdb/influxdb-grafana-controller.yaml)
 * [Kibana](http://releases.k8s.io/master/cluster/addons/fluentd-elasticsearch/kibana-deployment.yaml)
 * [FluentD with ElasticSearch Plugin](http://releases.k8s.io/master/cluster/addons/fluentd-elasticsearch/fluentd-es-ds.yaml)
@@ -55,7 +56,7 @@ Kubernetes 集群内的扩展也需要分配更多的资源，包括为这些 Po
 以下扩展服务需要增大副本数：
 
 * [elasticsearch](http://releases.k8s.io/master/cluster/addons/fluentd-elasticsearch/es-statefulset.yaml)
-* [DNS (kube-dns or CoreDNS)](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns)
+* [DNS \(kube-dns or CoreDNS\)](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns)
 
 另外，为了保证多个副本分散调度到不同的 Node 上，需要为容器配置 [AntiAffinity](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity)。比如，对 kube-dns，可以增加如下的配置：
 
@@ -103,7 +104,7 @@ affinity:
 
 增大内核选项配置 `/etc/sysctl.conf`：
 
-```sh
+```bash
 fs.file-max=1000000
 
 net.ipv4.ip_forward=1
@@ -136,16 +137,24 @@ fs.inotify.max_user_watches=524288
   * `spec.containers[].resources.requests.memory`
   * `spec.containers[].resources.limits.ephemeral-storage`
   * `spec.containers[].resources.requests.ephemeral-storage`
-* 对关键应用使用 PodDisruptionBudget、nodeAffinity、podAffinity 和 podAntiAffinity 等保护
-* 尽量使用控制器来管理容器（如 Deployment、StatefulSet、DaemonSet、Job 等）
-* 更多内容参考[这里](../deploy/kubernetes-configuration-best-practice.md)
+* 对关键应用使用 PodDisruptionBudget、nodeAffinity、podAffinity 和 podAntiAffinity 等保护。
+* 尽量使用控制器来管理容器（如 Deployment、StatefulSet、DaemonSet、Job 等）。
+* 开启 [Watch Bookmarks](https://kubernetes.io/docs/reference/using-api/api-concepts/#watch-bookmarks) 优化 Watch 性能（1.17 GA），客户端凯伊在 Watch 请求中增加 `allowWatchBookmarks=true` 来开启这个特性。
+* 减少镜像体积，P2P 镜像分发，预缓存热点镜像。
+* 更多内容参考[这里](../setup/kubernetes-configuration-best-practice.md)。
 
 ## 必要的扩展
 
 监控、告警以及可视化（如 Prometheus 和 Grafana）至关重要，推荐部署并开启。
 
+* [如何扩展单个Prometheus实现近万Kubernetes集群监控](https://mp.weixin.qq.com/s/DBJ0F3g2Y5EhS02D7k2n5w)
+
 ## 参考文档
 
-* [Building Large Clusters](https://kubernetes.io/docs/setup/cluster-large/)
+* [Building Large Clusters](https://kubernetes.io/docs/setup/best-practices/cluster-large/)
 * [Scaling Kubernetes to 2,500 Nodes](https://blog.openai.com/scaling-kubernetes-to-2500-nodes/)
 * [Scaling Kubernetes for 25M users](https://medium.com/@brendanrius/scaling-kubernetes-for-25m-users-a7937e3536a0)
+* [How Does Alibaba Ensure the Performance of System Components in a 10,000-node Kubernetes Cluster](https://www.alibabacloud.com/blog/how-does-alibaba-ensure-the-performance-of-system-components-in-a-10000-node-kubernetes-cluster_595469)
+* [Architecting Kubernetes clusters — choosing a cluster size](https://itnext.io/architecting-kubernetes-clusters-choosing-a-cluster-size-92f6feaa2908)
+* [Bayer Crop Science seeds the future with 15000-node GKE clusters](https://cloud.google.com/blog/products/containers-kubernetes/google-kubernetes-engine-clusters-can-have-up-to-15000-nodes)
+
