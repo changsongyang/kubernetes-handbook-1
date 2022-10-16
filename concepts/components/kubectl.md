@@ -119,6 +119,8 @@ Options:
 
 `kubectl exec` 用于在一个正在运行的容器执行命令。跟 docker 的 exec 命令类似。
 
+> 多容器 Pod 可通过 `kubectl.kubernetes.io/default-container` annotation 配置 kubectl 命令的默认容器。
+
 ```bash
   # Get output from running 'date' from pod 123456-7890, using the first container by default
   kubectl exec 123456-7890 date
@@ -326,7 +328,7 @@ kubectl 也可以用来直接访问原始 URI，比如要访问 [Metrics API](ht
 * `kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes`
 * `kubectl get --raw /apis/metrics.k8s.io/v1beta1/pods`
 * `kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes/<node-name>`
-* `kubectl get --raw /apis/metrics.k8s.io/v1beta1/namespace/<namespace-name>/pods/<pod-name>`
+* `kubectl get --raw /apis/metrics.k8s.io/v1beta1/namespaces/<namespace-name>/pods/<pod-name>`
 
 ## 附录
 
@@ -342,4 +344,3 @@ curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s htt
 # Windows
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/windows/amd64/kubectl.exe
 ```
-

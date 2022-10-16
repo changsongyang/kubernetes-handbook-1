@@ -71,6 +71,15 @@ cAdvisor 是一个开源的分析容器资源使用率和性能特性的代理�
 
 cAdvisor 通过其所在节点机的 4194 端口暴露一个简单的 UI。
 
+## 内存控制策略
+
+内存控制策略是 Kubelet 在 v1.21 中新增的一个 Alpha 特性，用于为 Pod 提供 NUMA 内存。Kubelet 新增了 `--memory-manager-policy` 用于配置内存控制策略，它支持两个策略：
+
+- 默认策略是 none，等同于内存控制策略未开启；
+- static 策略：为 Pod 分配 NUMA 内存并确保 Guaranteed Pod 预留足够的内存（Kubelet 状态保存在 `/var/lib/kubelet/memory_manager_state` 文件中）。
+
+![](kubelet-memory-manager.png)
+
 ## Kubelet Eviction（驱逐）
 
 Kubelet 会监控资源的使用情况，并使用驱逐机制防止计算和存储资源耗尽。在驱逐时，Kubelet 将 Pod 的所有容器停止，并将 PodPhase 设置为 Failed。
@@ -79,7 +88,7 @@ Kubelet 定期（`housekeeping-interval`）检查系统的资源是否达到了�
 
 | Eviction Signal | Condition | Description |
 | :--- | :--- | :--- |
-| `memory.available` | MemoryPressue | `memory.available` := `node.status.capacity[memory]` - `node.stats.memory.workingSet` （计算方法参考[这里](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/memory-available.sh)） |
+| `memory.available` | MemoryPressue | `memory.available` := `node.status.capacity[memory]` - `node.stats.memory.workingSet` （计算方法参考[这里](https://kubernetes.io/docs/tasks/administer-cluster/memory-available.sh)） |
 | `nodefs.available` | DiskPressure | `nodefs.available` := `node.stats.fs.available`（Kubelet Volume以及日志等） |
 | `nodefs.inodesFree` | DiskPressure | `nodefs.inodesFree` := `node.stats.fs.inodesFree` |
 | `imagefs.available` | DiskPressure | `imagefs.available` := `node.stats.runtime.imagefs.available`（镜像以及容器可写层等） |
@@ -212,4 +221,3 @@ Kubelet 作为 CRI 的客户端，而容器运行时则需要实现 CRI 的服�
 kubectl proxy&
 curl http://localhost:8001/api/v1/proxy/nodes/<node-name>:10255/stats/summary
 ```
-

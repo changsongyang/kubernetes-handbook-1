@@ -10,7 +10,7 @@ Kubernetes 提供了三种配置 Security Context 的方法：
 
 ## Container-level Security Context
 
-[Container-level Security Context](https://kubernetes.io/docs/api-reference/v1.15/#securitycontext-v1-core) 仅应用到指定的容器上，并且不会影响 Volume。比如设置容器运行在特权模式：
+[Container-level Security Context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) 仅应用到指定的容器上，并且不会影响 Volume。比如设置容器运行在特权模式：
 
 ```yaml
 apiVersion: v1
@@ -28,7 +28,7 @@ spec:
 
 ## Pod-level Security Context
 
-[Pod-level Security Context](https://kubernetes.io/docs/api-reference/v1.15/#podsecuritycontext-v1-core) 应用到 Pod 内所有容器，并且还会影响 Volume（包括 fsGroup 和 selinuxOptions）。
+[Pod-level Security Context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) 应用到 Pod 内所有容器，并且还会影响 Volume（包括 fsGroup 和 selinuxOptions）。
 
 ```yaml
 apiVersion: v1
@@ -52,12 +52,15 @@ Pod Security Policies（PSP）是集群级的 Pod 安全策略，自动为集群
 
 使用 PSP 需要 API Server 开启 `extensions/v1beta1/podsecuritypolicy`，并且配置 `PodSecurityPolicy` admission 控制器。
 
+> 由于 中从代码库中删除。PodSecurityPolicy API 不够灵活、认证模型不够完善且配置更新繁琐等缺陷，PodSecurityPolicy 已在 v1.21 正式[弃用](https://kubernetes.io/blog/2021/04/06/podsecuritypolicy-deprecation-past-present-and-future/)，并将在 v1.25 中从代码库中删除。已经使用 PodSecurityPolicy 的用户推荐迁移到 [Open Policy Agent](https://www.openpolicyagent.org/)。
+
 ### API 版本对照表
 
 | Kubernetes 版本 | Extension 版本 |
 | :--- | :--- |
 | v1.5-v1.15 | extensions/v1beta1 |
 | v1.10+ | policy/v1beta1 |
+| v1.21  | deprecated |
 
 ### 支持的控制项
 
@@ -201,4 +204,3 @@ drwxr-xr-x. root root unconfined_u:object_r:svirt_sandbox_file_t:s0:c2,c3 kubern
 ## 参考文档
 
 * [Kubernetes Pod Security Policies](https://kubernetes.io/docs/concepts/policy/pod-security-policy/)
-
